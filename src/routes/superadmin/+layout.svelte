@@ -27,7 +27,7 @@
 		<div class="max-w-6xl mx-auto px-4">
 			<div class="flex items-center justify-between h-14">
 				<div class="flex items-center gap-6">
-					<span class="font-bold text-sm text-gray-300">TutorTimeCard · Super Admin</span>
+					<span class="font-bold text-sm text-gray-300">Tutorly · Super Admin</span>
 					<div class="flex gap-1">
 						{#each navItems as item}
 							<a

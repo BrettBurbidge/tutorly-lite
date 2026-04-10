@@ -37,15 +37,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(400, 'One or more appointments are already locked');
 	}
 
-	// Check for unresolved unmatched non-cancelled appointments
-	const unresolved = (appointments as Appt[]).filter(
-		(a) =>
-			!a.matched_student_id &&
-			(a.status === 'complete' || a.status === 'no_show')
-	);
+	// Check for unresolved unmatched appointments only when students feature is enabled
+	const settings = await prisma.tutorSettings.findUnique({
+		where: { tenant_id: tenantId },
+		select: { enable_students: true },
+	});
 
-	if (unresolved.length > 0) {
-		throw error(400, 'Unresolved unmatched appointments must be assigned before confirming');
+	if (settings?.enable_students) {
+		const unresolved = (appointments as Appt[]).filter(
+			(a) =>
+				!a.matched_student_id &&
+				(a.status === 'complete' || a.status === 'no_show')
+		);
+
+		if (unresolved.length > 0) {
+			throw error(400, 'Unresolved unmatched appointments must be assigned before confirming');
+		}
 	}
 
 	// Create timesheet and lock appointments in one transaction

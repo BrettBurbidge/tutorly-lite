@@ -18,7 +18,7 @@
 <main class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
 	<div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
 		<div class="mb-6">
-			<h1 class="text-3xl font-bold text-gray-900">TutorTimeCard Lite</h1>
+			<h1 class="text-3xl font-bold text-gray-900">Tutorly</h1>
 			<p class="mt-2 text-gray-500 text-sm">Your personal tutoring timesheet — sign in with Google to get started.</p>
 		</div>
 

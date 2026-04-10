@@ -40,7 +40,7 @@
 		<div class="flex items-center justify-between h-14">
 			<!-- Logo + desktop nav -->
 			<div class="flex items-center gap-6">
-				<span class="font-bold text-gray-900 text-sm">TutorTimeCard</span>
+				<span class="font-bold text-gray-900 text-sm">Tutorly</span>
 				<div class="hidden sm:flex items-center gap-1">
 					{#each navItems as item}
 						<a

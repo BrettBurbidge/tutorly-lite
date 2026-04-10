@@ -14,6 +14,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		date: string;
 		start_time: string;
 		end_time: string;
+		location?: string | null;
 		matched_student_id?: string | null;
 		status?: 'default' | 'complete' | 'cancelled' | 'no_show';
 	};
@@ -32,16 +33,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			date: new Date(body.date),
 			start_time: new Date(body.start_time),
 			end_time: new Date(body.end_time),
+			location: body.location ?? null,
 			matched_student_id: body.matched_student_id ?? null,
 			status: body.status ?? 'default',
 		},
 		update: {
-			// Only update title/times if not locked; never override user-set status
+			// Only update title/times/location if not locked; never override user-set status
 			google_event_title: body.google_event_title,
 			start_time: new Date(body.start_time),
 			end_time: new Date(body.end_time),
-			// Only set matched_student_id if not already matched
-			...(body.matched_student_id ? {} : {}),
+			location: body.location ?? null,
 		},
 		include: {
 			matched_student: {

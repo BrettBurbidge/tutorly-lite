@@ -23,15 +23,18 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		throw error(404, 'Appointment not found');
 	}
 
-	if (appointment.locked) {
+	// Notes can be updated on locked appointments; status/paid cannot
+	const isNotesOnly = body.notes !== undefined && body.status === undefined && body.paid === undefined;
+
+	if (appointment.locked && !isNotesOnly) {
 		throw error(400, 'Cannot modify a locked appointment');
 	}
 
 	const updated = await prisma.appointmentStatus.update({
 		where: { id },
 		data: {
-			...(body.status !== undefined ? { status: body.status } : {}),
-			...(body.paid !== undefined ? { paid: body.paid } : {}),
+			...(body.status !== undefined && !appointment.locked ? { status: body.status } : {}),
+			...(body.paid !== undefined && !appointment.locked ? { paid: body.paid } : {}),
 			...(body.notes !== undefined ? { notes: body.notes } : {}),
 		},
 	});

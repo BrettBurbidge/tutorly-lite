@@ -38,6 +38,7 @@
 		paid: boolean;
 		locked: boolean;
 		notes?: string | null;
+		location?: string | null;
 		matched_student_id: string | null;
 		matched_student?: { id: string; first_name: string; last_name: string; rate_type: string; rate_amount: string | number } | null;
 	}
@@ -120,6 +121,7 @@
 					date: ev.start.dateTime ?? ev.start.date,
 					start_time: ev.start.dateTime ?? ev.start.date,
 					end_time: ev.end.dateTime ?? ev.end.date,
+					location: ev.location ?? null,
 					matched_student_id: matchedStudentId,
 					status: ev.status === 'cancelled' ? 'cancelled' : 'complete',
 				}),
@@ -299,6 +301,7 @@
 	interface CalendarEvent {
 		id: string;
 		summary?: string;
+		location?: string;
 		status?: string;
 		start: { dateTime?: string; date?: string };
 		end: { dateTime?: string; date?: string };

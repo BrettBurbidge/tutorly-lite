@@ -115,6 +115,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 interface GoogleCalendarEvent {
 	id: string;
 	summary?: string;
+	location?: string;
 	colorId?: string;
 	eventType?: string;
 	status?: string;

@@ -21,6 +21,7 @@
 		paid: boolean;
 		locked: boolean;
 		notes?: string | null;
+		location?: string | null;
 		matched_student_id: string | null;
 		matched_student?: Student | null;
 	}
@@ -132,15 +133,12 @@
 			</div>
 			<p class="text-sm text-gray-500 mt-0.5">
 				{formatTime(appointment.start_time)} · {formatDuration(appointment.start_time, appointment.end_time)}
+				{#if appointment.location}<span class="text-gray-400">· {appointment.location}</span>{/if}
 			</p>
 			{#if enableStudents}<p class="text-xs text-gray-400 mt-0.5">{rateLabel()}</p>{/if}
 
-			<!-- Notes -->
-			{#if appointment.locked}
-				{#if appointment.notes}
-					<p class="text-xs text-gray-500 mt-1.5 italic">"{appointment.notes}"</p>
-				{/if}
-			{:else if editingNotes}
+			<!-- Notes (editable even when locked) -->
+			{#if editingNotes}
 				<div class="mt-2 flex gap-2 items-start">
 					<textarea
 						class="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
