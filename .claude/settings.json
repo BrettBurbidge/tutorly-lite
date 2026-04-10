@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx shadcn-svelte@latest init --no-deps)",
+      "Bash(npx shadcn@next init)",
+      "Bash(pkill -f \"shadcn-svelte\")",
+      "Bash(npm run:*)",
+      "Bash(brew list:*)",
+      "Bash(supabase --version)",
+      "Bash(docker info:*)",
+      "Bash(psql \"postgresql://postgres:postgres@127.0.0.1:54322/postgres\" -c '\\\\dt public.*')",
+      "Bash(supabase db:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/brett/Documents/Code/CheLabs/TutorTimeCardLite/src/routes/api/appointments/[id]",
+      "/Users/brett/Documents/Code/CheLabs/TutorTimeCardLite/src/routes/superadmin/tutors"
+    ]
+  }
+}

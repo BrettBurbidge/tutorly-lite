@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/server/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TenantStatus {
+  active
+  suspended
+}
+
+enum UserRole {
+  super_admin
+  tutor
+}
+
+enum AppointmentStatusEnum {
+  default
+  complete
+  cancelled
+  no_show
+}
+
+enum RateType {
+  hourly
+  flat
+}
+
+enum PeriodType {
+  day
+  week
+}
+
+model Tenant {
+  id         String       @id @default(uuid())
+  status     TenantStatus @default(active)
+  created_at DateTime     @default(now())
+
+  users          User[]
+  parents        Parent[]
+  students       Student[]
+  appointments   AppointmentStatus[]
+  nameMatchCache NameMatchCache[]
+  timesheets     Timesheet[]
+  tutorSettings  TutorSettings?
+}
+
+model User {
+  id                   String    @id @default(uuid())
+  tenant_id            String?
+  tenant               Tenant?   @relation(fields: [tenant_id], references: [id])
+  email                String    @unique
+  role                 UserRole  @default(tutor)
+  supabase_uid         String    @unique
+  display_name         String
+  google_access_token  String?
+  google_refresh_token String?
+  created_at           DateTime  @default(now())
+}
+
+model Parent {
+  id         String   @id @default(uuid())
+  tenant_id  String
+  tenant     Tenant   @relation(fields: [tenant_id], references: [id])
+  first_name String
+  last_name  String
+  email      String?
+  phone      String?
+  created_at DateTime @default(now())
+
+  students Student[]
+}
+
+model Student {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  first_name  String
+  last_name   String
+  grade_level String?
+  notes       String?
+  parent_id   String
+  parent      Parent   @relation(fields: [parent_id], references: [id])
+  rate_type   RateType @default(hourly)
+  rate_amount Decimal  @default(0) @db.Decimal(10, 2)
+  created_at  DateTime @default(now())
+
+  appointments   AppointmentStatus[]
+  nameMatchCache NameMatchCache[]
+}
+
+model AppointmentStatus {
+  id                 String                @id @default(uuid())
+  tenant_id          String
+  tenant             Tenant                @relation(fields: [tenant_id], references: [id])
+  google_event_id    String
+  google_event_title String
+  date               DateTime              @db.Date
+  start_time         DateTime
+  end_time           DateTime
+  status             AppointmentStatusEnum @default(default)
+  paid               Boolean               @default(false)
+  locked             Boolean               @default(false)
+  notes              String?
+  matched_student_id String?
+  matched_student    Student?              @relation(fields: [matched_student_id], references: [id])
+  timesheet_id       String?
+  timesheet          Timesheet?            @relation(fields: [timesheet_id], references: [id])
+  created_at         DateTime              @default(now())
+  updated_at         DateTime              @updatedAt
+
+  @@unique([google_event_id, tenant_id])
+}
+
+model NameMatchCache {
+  id                     String   @id @default(uuid())
+  tenant_id              String
+  tenant                 Tenant   @relation(fields: [tenant_id], references: [id])
+  normalized_event_title String
+  matched_student_id     String
+  matched_student        Student  @relation(fields: [matched_student_id], references: [id])
+  created_at             DateTime @default(now())
+
+  @@unique([normalized_event_title, tenant_id])
+}
+
+model Timesheet {
+  id           String     @id @default(uuid())
+  tenant_id    String
+  tenant       Tenant     @relation(fields: [tenant_id], references: [id])
+  period_start DateTime   @db.Date
+  period_end   DateTime   @db.Date
+  period_type  PeriodType
+  submitted_at DateTime   @default(now())
+  excel_url    String?
+
+  appointments AppointmentStatus[]
+}
+
+model TutorSettings {
+  id                    String  @id @default(uuid())
+  tenant_id             String  @unique
+  tenant                Tenant  @relation(fields: [tenant_id], references: [id])
+  display_name          String
+  calendar_color_filter String  @default("11")
+  fuzzy_match_threshold Float   @default(0.6)
+  enable_students       Boolean @default(false)
+}
