@@ -266,17 +266,34 @@
 			}),
 		});
 
-		if (res.ok) {
-			const ts = await res.json() as { id: string };
-			showConfirm = false;
-			toast = { message: 'Period confirmed!', type: 'success' };
-			appointments = appointments.map((a) => ({ ...a, locked: true }));
-
-			// Trigger download
-			window.location.href = `/api/timesheets/${ts.id}/export`;
-		} else {
+		if (!res.ok) {
 			const err = await res.json() as { message?: string };
 			toast = { message: err.message ?? 'Failed to confirm', type: 'error' };
+			confirming = false;
+			return;
+		}
+
+		const ts = await res.json() as { id: string };
+		showConfirm = false;
+		appointments = appointments.map((a) => ({ ...a, locked: true }));
+
+		// Push to Google Sheets
+		const driveRes = await fetch(`/api/timesheets/${ts.id}/export-to-drive`, { method: 'POST' });
+		if (driveRes.ok) {
+			const body = await driveRes.json() as { tabName: string };
+			toast = { message: `Timesheet submitted! Saved to Google Sheets as tab "${body.tabName}".`, type: 'success' };
+		} else {
+			const text = await driveRes.text();
+			const msg = text.includes('NO_SHEETS_FILE')
+				? 'Period confirmed, but no Sheets file is configured. Set one in Settings.'
+				: text.includes('MISSING_TOKENS') || text.includes('SHEETS_NO_PERMISSION')
+					? 'Period confirmed, but Google Sheets access is not granted. Go to Settings and reconnect Google.'
+					: text.includes('SHEETS_FILE_NOT_FOUND')
+						? 'Period confirmed, but the Google Sheets file was not found. Check Settings.'
+						: text.includes('TAB_EXISTS')
+							? 'Period confirmed! (A tab for this period already exists in your Sheets file.)'
+							: 'Period confirmed, but failed to save to Google Sheets.';
+			toast = { message: msg, type: text.includes('TAB_EXISTS') ? 'success' : 'error' };
 		}
 		confirming = false;
 	}
@@ -440,11 +457,11 @@
 		<p><span class="font-medium">Total Hours:</span> {Math.round(totalHours * 100) / 100} hrs</p>
 		<p><span class="font-medium">Est. Earnings:</span> ${Math.round(totalEarnings * 100) / 100}</p>
 	</div>
-	<p class="text-xs text-gray-400 mt-4">Confirming will lock these appointments and generate an Excel timesheet.</p>
+	<p class="text-xs text-gray-400 mt-4">Confirming will lock these appointments and save them to your Google Sheets file.</p>
 	{#snippet footer()}
 		<Button variant="outline" onclick={() => (showConfirm = false)}>Cancel</Button>
 		<Button onclick={confirmPeriod} disabled={confirming}>
-			{confirming ? 'Confirming…' : 'Confirm & Download'}
+			{confirming ? 'Submitting…' : 'Confirm & Submit'}
 		</Button>
 	{/snippet}
 </Dialog>
