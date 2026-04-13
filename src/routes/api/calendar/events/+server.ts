@@ -90,26 +90,47 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			maxResults: '500',
 		});
 
-	const { data, newAccessToken } = await fetchWithRefresh(
-		dbUser.google_access_token,
-		dbUser.google_refresh_token ?? '',
-		locals.user!.id,
-		calendarUrl
-	);
+	const calendarListUrl = `${GOOGLE_CALENDAR_API}/users/me/calendarList/primary`;
 
-	if (!data) {
+	// Fetch events and calendar metadata in parallel
+	const [eventsResult, calendarResult] = await Promise.all([
+		fetchWithRefresh(
+			dbUser.google_access_token,
+			dbUser.google_refresh_token ?? '',
+			locals.user!.id,
+			calendarUrl
+		),
+		fetchWithRefresh(
+			dbUser.google_access_token,
+			dbUser.google_refresh_token ?? '',
+			locals.user!.id,
+			calendarListUrl
+		),
+	]);
+
+	if (!eventsResult.data) {
 		return json({ events: [], reconnectRequired: true });
 	}
 
-	const calData = data as { items?: GoogleCalendarEvent[] };
+	const calData = eventsResult.data as { items?: GoogleCalendarEvent[] };
+	const calMeta = calendarResult.data as { colorId?: string } | null;
 
-	// Filter to only red (colorId 11 / Tomato) events, or the configured color
+	console.log('[calendar/events] primary calendar colorId:', calMeta?.colorId, '| filter:', colorFilter);
+	console.log('[calendar/events] total events before filter:', (calData.items ?? []).length);
+	console.log('[calendar/events] event colorIds:', (calData.items ?? []).map(e => ({ title: e.summary, colorId: e.colorId })));
+
+	// An event matches if it has an explicit colorId matching the filter,
+	// OR it has no individual color override and the calendar's own color matches.
+	const calendarColorMatches = (calMeta?.colorId ?? null) === colorFilter;
+
 	const filtered = (calData.items ?? []).filter((ev) => {
-		const colorId = ev.colorId ?? ev.eventType;
-		return colorId === colorFilter;
+		if (ev.colorId) return ev.colorId === colorFilter;
+		return calendarColorMatches;
 	});
 
-	return json({ events: filtered, reconnectRequired: false, newAccessToken });
+	console.log('[calendar/events] events after filter:', filtered.length);
+
+	return json({ events: filtered, reconnectRequired: false, newAccessToken: eventsResult.newAccessToken });
 };
 
 interface GoogleCalendarEvent {

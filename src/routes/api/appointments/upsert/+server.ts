@@ -30,7 +30,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			tenant_id: tenantId,
 			google_event_id: body.google_event_id,
 			google_event_title: body.google_event_title,
-			date: new Date(body.date),
+			// Extract the local date from the timezone-aware ISO string (e.g. "2026-04-16T13:45:00-06:00" → "2026-04-16")
+			// so PostgreSQL stores the calendar's local date, not the UTC date.
+			date: new Date(`${body.date.split('T')[0]}T00:00:00.000Z`),
 			start_time: new Date(body.start_time),
 			end_time: new Date(body.end_time),
 			location: body.location ?? null,
@@ -40,6 +42,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		update: {
 			// Only update title/times/location if not locked; never override user-set status
 			google_event_title: body.google_event_title,
+			date: new Date(`${body.date.split('T')[0]}T00:00:00.000Z`),
 			start_time: new Date(body.start_time),
 			end_time: new Date(body.end_time),
 			location: body.location ?? null,

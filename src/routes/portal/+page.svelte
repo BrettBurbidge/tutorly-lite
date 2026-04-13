@@ -292,7 +292,8 @@
 				date: d,
 				label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
 				appts: appointments.filter(
-					(a) => new Date(a.date).toDateString() === d.toDateString()
+					// Compare ISO date strings to avoid local-timezone shifts on UTC midnight values
+					(a) => a.date.slice(0, 10) === new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10)
 				),
 			};
 		});
