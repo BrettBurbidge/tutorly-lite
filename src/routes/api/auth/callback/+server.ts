@@ -31,6 +31,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	if (existingUser) {
 		// Returning user — update tokens if provided
+		console.log('[auth/callback] provider_token present:', !!session.provider_token, '| refresh_token present:', !!session.provider_refresh_token);
 		const providerTokens = session.provider_token
 			? {
 					google_access_token: session.provider_token,

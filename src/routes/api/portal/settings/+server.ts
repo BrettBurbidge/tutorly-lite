@@ -22,6 +22,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		calendar_color_filter: string;
 		fuzzy_match_threshold: number;
 		enable_students: boolean;
+		google_sheets_file_id: string | null;
 	}>;
 
 	if (
@@ -31,9 +32,20 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		throw error(400, 'fuzzy_match_threshold must be between 0 and 1');
 	}
 
+	// Extract file ID from a full Google Sheets URL if provided
+	let sheetsFileId = body.google_sheets_file_id;
+	if (sheetsFileId) {
+		const match = sheetsFileId.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+		if (match) sheetsFileId = match[1];
+	}
+
+	const { google_sheets_file_id: _unused, ...rest } = body;
 	const updated = await prisma.tutorSettings.update({
 		where: { tenant_id: locals.tenantId! },
-		data: body,
+		data: {
+			...rest,
+			...(body.google_sheets_file_id !== undefined ? { google_sheets_file_id: sheetsFileId ?? null } : {}),
+		},
 	});
 
 	// Also update display_name on User record if changed

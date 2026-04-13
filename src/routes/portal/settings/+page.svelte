@@ -15,6 +15,7 @@
 	let colorFilter = $state(untrack(() => data.settings?.calendar_color_filter ?? '11'));
 	let threshold = $state(untrack(() => data.settings?.fuzzy_match_threshold ?? 0.6));
 	let enableStudents = $state(untrack(() => data.settings?.enable_students ?? false));
+	let sheetsFileInput = $state(untrack(() => data.googleSheetsFileId ?? ''));
 	let saving = $state(false);
 	let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -49,6 +50,7 @@
 				calendar_color_filter: colorFilter,
 				fuzzy_match_threshold: threshold,
 				enable_students: enableStudents,
+				google_sheets_file_id: sheetsFileInput.trim() || null,
 			}),
 		});
 
@@ -66,7 +68,7 @@
 			provider: 'google',
 			options: {
 				redirectTo: `${window.location.origin}/api/auth/callback`,
-				scopes: 'https://www.googleapis.com/auth/calendar.readonly',
+				scopes: 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/spreadsheets',
 				queryParams: { access_type: 'offline', prompt: 'consent' },
 			},
 		});
@@ -89,7 +91,7 @@
 			</div>
 		</div>
 		<Button variant="outline" size="sm" onclick={reconnectGoogle}>
-			Reconnect Google Calendar
+			Reconnect Google (Calendar + Sheets)
 		</Button>
 	</section>
 
@@ -149,6 +151,22 @@
 				<span class={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${enableStudents ? 'translate-x-5' : 'translate-x-0'}`}></span>
 			</button>
 		</label>
+	</section>
+
+	<!-- Google Sheets export target -->
+	<section class="bg-white rounded-xl border border-gray-200 p-5">
+		<h2 class="font-semibold text-gray-900 mb-3">Google Sheets Export</h2>
+		<p class="text-sm text-gray-500 mb-3">
+			Paste the URL or file ID of a Google Sheets file on your Drive. Each timesheet export will
+			append a new tab named after the period.
+		</p>
+		<Input
+			bind:value={sheetsFileInput}
+			placeholder="https://docs.google.com/spreadsheets/d/… or file ID"
+		/>
+		{#if sheetsFileInput && !sheetsFileInput.includes('docs.google.com') && !sheetsFileInput.match(/^[a-zA-Z0-9_-]{20,}$/)}
+			<p class="text-xs text-amber-600 mt-1">This doesn't look like a valid Sheets URL or file ID.</p>
+		{/if}
 	</section>
 
 	<Button onclick={saveSettings} disabled={saving} size="lg">

@@ -8,6 +8,7 @@
 	let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
 	let emailingId = $state<string | null>(null);
 	let deletingId = $state<string | null>(null);
+	let drivingId = $state<string | null>(null);
 
 	async function emailTimesheet(id: string) {
 		emailingId = id;
@@ -18,6 +19,28 @@
 			toast = { message: 'Failed to send email.', type: 'error' };
 		}
 		emailingId = null;
+	}
+
+	async function exportToDrive(id: string) {
+		drivingId = id;
+		const res = await fetch(`/api/timesheets/${id}/export-to-drive`, { method: 'POST' });
+		if (res.ok) {
+			const body = await res.json();
+			toast = { message: `Saved to Google Sheets as tab "${body.tabName}"!`, type: 'success' };
+		} else {
+			const text = await res.text();
+			const msg = text.includes('NO_SHEETS_FILE')
+				? 'No Sheets file configured. Set one in Settings first.'
+				: text.includes('MISSING_TOKENS') || text.includes('SHEETS_NO_PERMISSION')
+					? 'Google Sheets access not granted. Go to Settings and click "Reconnect Google (Calendar + Sheets)".'
+					: text.includes('SHEETS_FILE_NOT_FOUND')
+						? 'Google Sheets file not found. Check your target file in Settings.'
+						: text.includes('TAB_EXISTS')
+							? 'A tab for this period already exists in your Sheets file.'
+							: 'Failed to export to Google Drive.';
+			toast = { message: msg, type: 'error' };
+		}
+		drivingId = null;
 	}
 
 	async function deleteTimesheet(id: string) {
@@ -63,6 +86,14 @@
 					<a href={`/api/timesheets/${ts.id}/export`} download>
 						<Button variant="outline" size="sm">Download</Button>
 					</a>
+					<Button
+						variant="outline"
+						size="sm"
+						onclick={() => exportToDrive(ts.id)}
+						disabled={drivingId === ts.id}
+					>
+						{drivingId === ts.id ? 'Saving…' : 'Save to Sheets'}
+					</Button>
 					<Button
 						variant="secondary"
 						size="sm"

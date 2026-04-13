@@ -11,11 +11,14 @@
       "Bash(supabase --version)",
       "Bash(docker info:*)",
       "Bash(psql \"postgresql://postgres:postgres@127.0.0.1:54322/postgres\" -c '\\\\dt public.*')",
-      "Bash(supabase db:*)"
+      "Bash(supabase db:*)",
+      "Bash(grep -v '^$')",
+      "Bash(npx tsc:*)"
     ],
     "additionalDirectories": [
       "/Users/brett/Documents/Code/CheLabs/TutorTimeCardLite/src/routes/api/appointments/[id]",
-      "/Users/brett/Documents/Code/CheLabs/TutorTimeCardLite/src/routes/superadmin/tutors"
+      "/Users/brett/Documents/Code/CheLabs/TutorTimeCardLite/src/routes/superadmin/tutors",
+      "/Users/brett/Documents/Code/CheLabs/TutorTimeCardLite/src/routes/api/timesheets/[id]"
     ]
   }
 }

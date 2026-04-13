@@ -95,8 +95,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			{ key: 'd', width: 13 }, // Hours
 			{ key: 'e', width: 10 }, // Rate
 			{ key: 'f', width: 10 }, // Amount
-			{ key: 'g', width: 22 }, // Location
-			{ key: 'h', width: 32 }, // Notes
+			{ key: 'g', width: 32 }, // Notes
+			{ key: 'h', width: 22 }, // Location
 			{ key: 'i', width: 8  }, // Paid
 		];
 	} else {
@@ -105,8 +105,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			{ key: 'b', width: 30 }, // Appointment
 			{ key: 'c', width: 18 }, // Time
 			{ key: 'd', width: 13 }, // Hours
-			{ key: 'e', width: 22 }, // Location
-			{ key: 'f', width: 32 }, // Notes
+			{ key: 'e', width: 32 }, // Notes
+			{ key: 'f', width: 22 }, // Location
 		];
 	}
 
@@ -152,16 +152,16 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		styleHeader(sheet.getCell('D7'), 'Total Hours');
 		styleHeader(sheet.getCell('E7'), 'Rate');
 		styleHeader(sheet.getCell('F7'), 'Amount');
-		styleHeader(sheet.getCell('G7'), 'Location');
-		styleHeader(sheet.getCell('H7'), 'Notes');
+		styleHeader(sheet.getCell('G7'), 'Notes');
+		styleHeader(sheet.getCell('H7'), 'Location');
 		styleHeader(sheet.getCell('I7'), 'Paid');
 	} else {
 		styleHeader(sheet.getCell('A7'), 'Day / Date');
 		styleHeader(sheet.getCell('B7'), 'Appointment');
 		styleHeader(sheet.getCell('C7'), 'Time');
 		styleHeader(sheet.getCell('D7'), 'Total Hours');
-		styleHeader(sheet.getCell('E7'), 'Location');
-		styleHeader(sheet.getCell('F7'), 'Notes');
+		styleHeader(sheet.getCell('E7'), 'Notes');
+		styleHeader(sheet.getCell('F7'), 'Location');
 	}
 
 	// ── Data rows (grouped by day) ───────────────────────────
@@ -224,8 +224,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 				row.getCell(5).alignment = { horizontal: 'center' };
 				row.getCell(6).value = student ? `$${Math.round(amount * 100) / 100}` : '—';
 				row.getCell(6).alignment = { horizontal: 'center' };
-				row.getCell(7).value = appt.location ?? '';
-				row.getCell(8).value = appt.notes ?? '';
+				row.getCell(7).value = appt.notes ?? '';
+				row.getCell(8).value = appt.location ?? '';
 				row.getCell(9).value = appt.paid ? 'Yes' : 'No';
 				row.getCell(9).alignment = { horizontal: 'center' };
 			} else {
@@ -233,8 +233,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 				row.getCell(3).value = timeStr;
 				row.getCell(4).value = Math.round(duration * 100) / 100;
 				row.getCell(4).alignment = { horizontal: 'center' };
-				row.getCell(5).value = appt.location ?? '';
-				row.getCell(6).value = appt.notes ?? '';
+				row.getCell(5).value = appt.notes ?? '';
+				row.getCell(6).value = appt.location ?? '';
 			}
 		}
 

@@ -58,6 +58,7 @@ model User {
   display_name         String
   google_access_token  String?
   google_refresh_token String?
+  google_token_expiry  DateTime?
   created_at           DateTime  @default(now())
 }
 
@@ -149,4 +150,5 @@ model TutorSettings {
   calendar_color_filter String  @default("11")
   fuzzy_match_threshold Float   @default(0.6)
   enable_students       Boolean @default(false)
+  google_sheets_file_id String?
 }

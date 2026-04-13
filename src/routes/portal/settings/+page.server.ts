@@ -15,5 +15,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		email: dbUser?.email ?? '',
 		googleDisplayName: dbUser?.display_name ?? '',
 		enableStudents: settings?.enable_students ?? false,
+		googleSheetsFileId: settings?.google_sheets_file_id ?? '',
 	};
 };
