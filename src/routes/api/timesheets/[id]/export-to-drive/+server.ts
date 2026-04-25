@@ -64,9 +64,9 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	const tutorName = settings.display_name ?? 'Tutor';
 	const enableStudents = settings.enable_students ?? false;
 
-	// Tab name: "M-D to M-D"
-	const shortDate = (d: Date) => `${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
-	const tabName = `${shortDate(timesheet.period_start)} to ${shortDate(timesheet.period_end)}`;
+	// Tab name: "M/D/YYYY-M/D/YYYY"
+	const fmtTabDate = (d: Date) => `${d.getUTCMonth() + 1}/${d.getUTCDate()}/${d.getUTCFullYear()}`;
+	const tabName = `${fmtTabDate(timesheet.period_start)}-${fmtTabDate(timesheet.period_end)}`;
 
 	// Check target spreadsheet exists and look for duplicate tab
 	let spreadsheet;
@@ -91,8 +91,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	}
 
 	// Build row data mirroring the Excel export layout
-	const friday = new Date(timesheet.period_start);
-	friday.setDate(timesheet.period_start.getDate() + 4);
+	const weekEndStr = `${timesheet.period_end.getUTCMonth() + 1}/${timesheet.period_end.getUTCDate()}/${timesheet.period_end.getUTCFullYear()}`;
 
 	const headers = enableStudents
 		? ['Day / Date', 'Student Name', 'Time', 'Total Hours', 'Rate', 'Amount', 'Notes', 'Location', 'Paid']
@@ -102,7 +101,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 		['Personalized Tutoring'],
 		[],
 		['Employee', tutorName],
-		['Week ending:', friday.toLocaleDateString('en-US')],
+		['Week ending:', weekEndStr],
 		[],
 		headers,
 	];

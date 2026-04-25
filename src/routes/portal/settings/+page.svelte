@@ -16,8 +16,22 @@
 	let threshold = $state(untrack(() => data.settings?.fuzzy_match_threshold ?? 0.6));
 	let enableStudents = $state(untrack(() => data.settings?.enable_students ?? false));
 	let sheetsFileInput = $state(untrack(() => data.googleSheetsFileId ?? ''));
+	let workDays = $state<number[]>(untrack(() => data.settings?.work_days?.length ? data.settings.work_days : [1, 2, 3, 4, 5, 6]));
 	let saving = $state(false);
 	let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
+
+	const DAY_OPTIONS = [
+		{ v: 1, l: 'Mon' }, { v: 2, l: 'Tue' }, { v: 3, l: 'Wed' },
+		{ v: 4, l: 'Thu' }, { v: 5, l: 'Fri' }, { v: 6, l: 'Sat' }, { v: 0, l: 'Sun' },
+	];
+
+	function toggleWorkDay(day: number) {
+		if (workDays.includes(day)) {
+			if (workDays.length > 1) workDays = workDays.filter((d) => d !== day);
+		} else {
+			workDays = [...workDays, day];
+		}
+	}
 
 	const colorOptions = [
 		{ value: '11', label: 'Tomato (Red) — default' },
@@ -51,6 +65,7 @@
 				fuzzy_match_threshold: threshold,
 				enable_students: enableStudents,
 				google_sheets_file_id: sheetsFileInput.trim() || null,
+				work_days: workDays,
 			}),
 		});
 
@@ -129,6 +144,24 @@
 			<span>Lenient</span>
 			<span class="text-center text-blue-600 font-medium">{threshold.toFixed(2)} — {thresholdLabel()}</span>
 			<span>Strict</span>
+		</div>
+	</section>
+
+	<!-- Work Days -->
+	<section class="bg-white rounded-xl border border-gray-200 p-5">
+		<h2 class="font-semibold text-gray-900 mb-1">Work Days</h2>
+		<p class="text-sm text-gray-500 mb-4">Only these days appear in the week view and timesheet.</p>
+		<div class="flex gap-2 flex-wrap">
+			{#each DAY_OPTIONS as day}
+				<button
+					type="button"
+					onclick={() => toggleWorkDay(day.v)}
+					disabled={workDays.includes(day.v) && workDays.length === 1}
+					class={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-40 ${workDays.includes(day.v) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+				>
+					{day.l}
+				</button>
+			{/each}
 		</div>
 	</section>
 

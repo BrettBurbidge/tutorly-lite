@@ -10,6 +10,11 @@
 	let { data } = $props();
 
 	const enableStudents = untrack(() => data.enableStudents as boolean);
+	const workDays = untrack(() => data.settings?.work_days?.length ? data.settings.work_days : [1, 2, 3, 4, 5, 6]);
+
+	// Convert a JS day number to offset from Monday (Mon=0 … Sun=6)
+	const toOffset = (d: number) => d === 0 ? 6 : d - 1;
+	const workDayOffsets = workDays.map(toOffset).sort((a: number, b: number) => a - b);
 
 	// View state — week-only when students disabled
 	let viewMode = $state<'day' | 'week'>(enableStudents ? 'day' : 'week');
@@ -43,16 +48,26 @@
 		matched_student?: { id: string; first_name: string; last_name: string; rate_type: string; rate_amount: string | number } | null;
 	}
 
-	function getWeekRange(date: Date) {
+	function getMondayOf(date: Date): Date {
 		const d = new Date(date);
 		const day = d.getDay();
-		const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-		const monday = new Date(d.setDate(diff));
-		monday.setHours(0, 0, 0, 0);
-		const sunday = new Date(monday);
-		sunday.setDate(monday.getDate() + 6);
-		sunday.setHours(23, 59, 59, 999);
-		return { start: monday, end: sunday };
+		d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+		d.setHours(0, 0, 0, 0);
+		return d;
+	}
+
+	function getWeekRange(date: Date) {
+		const monday = getMondayOf(date);
+		const start = new Date(monday);
+		start.setDate(monday.getDate() + workDayOffsets[0]);
+		const end = new Date(monday);
+		end.setDate(monday.getDate() + workDayOffsets[workDayOffsets.length - 1]);
+		end.setHours(23, 59, 59, 999);
+		return { start, end };
+	}
+
+	function toLocalDateStr(d: Date) {
+		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 	}
 
 	function getTimeRange() {
@@ -262,8 +277,8 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				appointmentIds: unlocked.map((a) => a.id),
-				periodStart: start.toISOString().split('T')[0],
-				periodEnd: end.toISOString().split('T')[0],
+				periodStart: toLocalDateStr(start),
+				periodEnd: toLocalDateStr(end),
 				periodType: viewMode,
 			}),
 		});
@@ -300,18 +315,17 @@
 		confirming = false;
 	}
 
-	// Day groupings for week view
+	// Day groupings for week view — only configured work days
 	const weekDays = $derived(() => {
 		if (viewMode !== 'week') return [];
-		const { start } = getWeekRange(selectedDate);
-		return Array.from({ length: 7 }, (_, i) => {
-			const d = new Date(start);
-			d.setDate(start.getDate() + i);
+		const monday = getMondayOf(selectedDate);
+		return workDayOffsets.map((offset: number) => {
+			const d = new Date(monday);
+			d.setDate(monday.getDate() + offset);
 			return {
 				date: d,
 				label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
 				appts: appointments.filter(
-					// Compare ISO date strings to avoid local-timezone shifts on UTC midnight values
 					(a) => a.date.slice(0, 10) === new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10)
 				),
 			};

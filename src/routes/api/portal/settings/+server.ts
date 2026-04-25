@@ -23,6 +23,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		fuzzy_match_threshold: number;
 		enable_students: boolean;
 		google_sheets_file_id: string | null;
+		work_days: number[];
 	}>;
 
 	if (
@@ -39,12 +40,13 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		if (match) sheetsFileId = match[1];
 	}
 
-	const { google_sheets_file_id: _unused, ...rest } = body;
+	const { google_sheets_file_id: _unused, work_days: _work_days, ...rest } = body;
 	const updated = await prisma.tutorSettings.update({
 		where: { tenant_id: locals.tenantId! },
 		data: {
 			...rest,
 			...(body.google_sheets_file_id !== undefined ? { google_sheets_file_id: sheetsFileId ?? null } : {}),
+			...(body.work_days !== undefined ? { work_days: { set: body.work_days } } : {}),
 		},
 	});
 

@@ -151,4 +151,5 @@ model TutorSettings {
   fuzzy_match_threshold Float   @default(0.6)
   enable_students       Boolean @default(false)
   google_sheets_file_id String?
+  work_days             Int[]   @default([1, 2, 3, 4, 5, 6])
 }
