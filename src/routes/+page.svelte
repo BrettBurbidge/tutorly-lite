@@ -126,7 +126,12 @@
 
 	<!-- Footer -->
 	<footer class="py-6 text-center text-xs" style="background-color: #162840; color: #457B9D;">
-		<p>© {new Date().getFullYear()} Tutorly · <a href="/login" class="hover:underline" style="color: #457B9D;">Admin login</a></p>
+		<p>
+			© {new Date().getFullYear()} Tutorly ·
+			<a href="/privacy" class="hover:underline" style="color: #457B9D;">Privacy Policy</a> ·
+			<a href="/terms" class="hover:underline" style="color: #457B9D;">Terms of Service</a> ·
+			<a href="/login" class="hover:underline" style="color: #457B9D;">Admin login</a>
+		</p>
 	</footer>
 
 </div>
