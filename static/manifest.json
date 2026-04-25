@@ -1,0 +1,17 @@
+{
+  "name": "Tutorly",
+  "short_name": "Tutorly",
+  "description": "Track tutoring sessions and get paid accurately.",
+  "start_url": "/portal",
+  "display": "standalone",
+  "background_color": "#1D3557",
+  "theme_color": "#1D3557",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
